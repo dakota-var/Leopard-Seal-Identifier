@@ -236,6 +236,11 @@ class Image:
         """Return the name of the photographer or source."""
         return self._attribution
 
+    @property
+    def created_at(self) -> datetime | None:
+        """Return when the image record was created."""
+        return self._created_at
+
     ### ----------| SETTERS |----------
 
     @file_path.setter
@@ -304,6 +309,53 @@ class Sighting:
         self._confidence = confidence
         self._created_at = datetime.now(timezone.utc)
 
+    ### ----------| PROPERTIES |----------
+
+    @property
+    def id(self) -> int:
+        """Return the unique identifier for this sighting."""
+        return self._id
+
+    @property
+    def seal_id(self) -> int:
+        """Return the unique identifier for the Seal seen."""
+        return self._seal_id
+
+    @property
+    def image_id(self) -> int:
+        """Return the unique identifier for the Image in question."""
+        return self._image_id
+
+    @property
+    def confidence(self) -> float | None:
+        """Return the confidence level of the prediction."""
+        if self._confidence is not None:
+            if not 0 <= self._confidence <= 1:
+                raise ValueError("Confidence must be between 0 and 1.")
+        return self._confidence
+
+    @property
+    def created_at(self) -> datetime | None:
+        """Return when the sighting record was created."""
+        return self._created_at
+
+    ### ----------| SETTERS |----------
+
+    @seal_id.setter
+    def seal_id(self, value: int) -> None:
+        self._seal_id = value
+
+    @image_id.setter
+    def image_id(self, value: int) -> None:
+        self._image_id = value
+
+    @confidence.setter
+    def confidence(self, value: float | None) -> None:
+        if value is not None:
+            if not 0 <= value <= 1:
+                raise ValueError("Confidence must be between 0 and 1.")
+        self._confidence = value
+
 
 class Prediction:
     """
@@ -341,6 +393,54 @@ class Prediction:
         self._notes = notes
         self._created_at = datetime.now(timezone.utc)
 
+    ### ----------| PROPERTIES |----------
+
+    @property
+    def id(self) -> int:
+        """Return the unique identifier for this prediction."""
+        return self._id
+
+    @property
+    def image_id(self) -> int:
+        """Return the unique identifier for the Image in question."""
+        return self._image_id
+
+    @property
+    def model_version(self) -> str:
+        """Return the version of the ML model used to make the prediction."""
+        return self._model_version
+
+    @property
+    def prediction_type(self) -> str:
+        """Return the type of prediction, e.g., 'species', 'age'."""
+        return self._prediction_type
+
+    @property
+    def prediction(self) -> str | None:
+        """Return the actual prediction."""
+        return self._prediction
+
+    @property
+    def confidence(self) -> float | None:
+        """Return the confidence level of the prediction."""
+        return self._confidence
+
+    @property
+    def notes(self) -> str | None:
+        """Return additional notes about the prediction."""
+        return self._notes
+
+    @property
+    def created_at(self) -> datetime:
+        """Return when the prediction record was created."""
+        return self._created_at
+
+    ### ----------| SETTERS |----------
+
+    @notes.setter
+    def notes(self, value: str | None) -> None:
+        self._notes = value
+
 class Review:
     """
     A Review represents a human evaluation of a Prediction or Image.
@@ -363,4 +463,47 @@ class Review:
         self._reviewer = reviewer
         self._notes = notes
         self._created_at = datetime.now(timezone.utc)
+
+    ### ----------| PROPERTIES |----------
+
+    @property
+    def id(self) -> int:
+        """Return the unique identifier for this review."""
+        return self._id
+
+    @property
+    def decision(self) -> str:
+        """Return the decision made by the reviewer."""
+        return self._decision
+
+    @property
+    def prediction_id(self) -> int | None:
+        """Return the unique identifier for the associated Prediction, if any."""
+        return self._prediction_id
+
+    @property
+    def image_id(self) -> int | None:
+        """Return the unique identifier for the associated Image, if any."""
+        return self._image_id
+
+    @property
+    def reviewer(self) -> str | None:
+        """Return the name of the reviewer."""
+        return self._reviewer
+
+    @property
+    def notes(self) -> str | None:
+        """Return additional notes about the review."""
+        return self._notes
+
+    @property
+    def created_at(self) -> datetime:
+        """Return when the review record was created."""
+        return self._created_at
+
+    ### ----------| SETTERS |----------
+
+    @notes.setter
+    def notes(self, value: str | None) -> None:
+        self._notes = value
 
