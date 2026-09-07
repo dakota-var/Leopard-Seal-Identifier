@@ -157,8 +157,8 @@ class Image:
     def __init__(
             self,
             image_id: int,
-            file_path: str | None = None,
-            source: str | None = None,
+            file_path: str,
+            source: str,
             source_id: str | None = None,
             captured_at: datetime | None = None,
             latitude: float | None = None,
@@ -190,6 +190,93 @@ class Image:
         self._attribution = attribution
         self._created_at = datetime.now(timezone.utc)
 
+    ### ----------| PROPERTIES |----------
+    @property
+    def id(self) -> int:
+        """Return the unique identifier for this image."""
+        return self._id
+
+    @property
+    def file_path(self) -> str:
+        """Return the path to the image file."""
+        return self._file_path
+
+    @property
+    def source(self) -> str:
+        """Return the source of the image."""
+        return self._source
+
+    @property
+    def source_id(self) -> str | None:
+        """Return the identifier the original source used to identify the image."""
+        return self._source_id
+
+    @property
+    def captured_at(self) -> datetime | None:
+        """Return when the photograph was taken."""
+        return self._captured_at
+
+    @property
+    def latitude(self) -> float | None:
+        """Return the latitude at which the photograph was taken."""
+        return self._latitude
+
+    @property
+    def longitude(self) -> float | None:
+        """Return the longitude at which the photograph was taken."""
+        return self._longitude
+
+    @property
+    def licence(self) -> str | None:
+        """Return the licence applicable to the image."""
+        return self._licence
+
+    @property
+    def attribution(self) -> str | None:
+        """Return the name of the photographer or source."""
+        return self._attribution
+
+    ### ----------| SETTERS |----------
+
+    @file_path.setter
+    def file_path(self, value: str) -> None:
+        self._file_path = value
+
+    @source.setter
+    def source(self, value: str) -> None:
+        self._source = value
+
+    @source_id.setter
+    def source_id(self, value: str | None) -> None:
+        self._source_id = value
+
+    @captured_at.setter
+    def captured_at(self, value: datetime | None) -> None:
+        if value is not None:
+            if value.tzinfo is None:
+                raise ValueError("captured_at must be timezone-aware.")
+            value = value.astimezone(timezone.utc)
+
+        self._captured_at = value
+
+    @latitude.setter
+    def latitude(self, value: float | None) -> None:
+        if value is not None:
+            if not -90 <= value <= 90:
+                raise ValueError("Latitude must be between -90 and 90.")
+        self._latitude = value
+
+    @longitude.setter
+    def longitude(self, value: float | None) -> None:
+        if value is not None:
+            if not -180 <= value <= 180:
+                raise ValueError("Longitude must be between -180 and 180.")
+        self._longitude = value
+
+    @licence.setter
+    def licence(self, value: str | None) -> None:
+        self._licence = value
+
 
 class Sighting:
     """
@@ -210,7 +297,6 @@ class Sighting:
             seal_id: The unique identifier for the Seal seen.
             image_id: The unique identifier for the Image in question.
             confidence: The confidence level of the prediction.
-            created_at: When the sighting record was created.
         """
         self._id = sighting_id
         self._seal_id = seal_id
