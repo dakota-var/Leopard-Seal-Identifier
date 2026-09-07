@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+
+# Environment/secrets
+.env
+
+# Generated data
+data/raw/
+data/interim/
+data/processed/
+data/training/
+
+# Generated models
+models/**/*.pt
+models/**/*.pth
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
