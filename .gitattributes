@@ -1,0 +1,50 @@
+# General text files
+
+* text=auto
+
+# Source code
+
+*.py text
+*.java text
+*.js text
+*.ts text
+
+# Configuration / documentation
+
+*.yml text
+*.yaml text
+*.json text
+*.toml text
+*.xml text
+*.md text
+*.txt text
+*.csv text
+
+# Shell scripts
+
+*.sh text eol=lf
+
+# Images and other binary files
+
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.gif binary
+*.webp binary
+*.tif binary
+*.tiff binary
+
+# Other common binary/project files
+
+*.pdf binary
+*.zip binary
+*.jar binary
+*.class binary
+
+# Machine-learning model files
+
+*.pt binary
+*.pth binary
+*.onnx binary
+*.pkl binary
+*.joblib binary
