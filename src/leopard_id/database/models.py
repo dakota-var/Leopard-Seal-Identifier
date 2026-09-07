@@ -10,7 +10,12 @@ The module defines the following main classes:
 - Review: Represents a review process for a seal-related entry.
 """
 
-from datetime import datetime, timezone
+import datetime
+from pathlib import Path
+from uuid import UUID
+
+from leopard_id.utils import parse_date, parse_datetime
+
 
 class Seal:
     """Represent an individual leopard seal."""
@@ -19,9 +24,9 @@ class Seal:
             self,
             seal_id: int,
             sex: str | None = None,
-            first_seen: datetime | None = None,
-            last_seen: datetime | None = None,
-            estimated_birth: datetime | None = None,
+            first_seen: datetime.datetime | None = None,
+            last_seen: datetime.datetime | None = None,
+            estimated_birth: datetime.datetime | None = None,
             notes: str | None = None,
     ) -> None:
         """Create a Seal instance.
@@ -40,7 +45,7 @@ class Seal:
         self._last_seen = last_seen
         self._estimated_birth = estimated_birth
         self._notes = notes
-        self._created_at = datetime.now(timezone.utc)
+        self._created_at = datetime.datetime.now(datetime.timezone.utc)
 
     ### ----------| PROPERTIES |----------
 
@@ -55,12 +60,12 @@ class Seal:
         return self._sex
 
     @property
-    def first_seen(self) -> datetime | None:
+    def first_seen(self) -> datetime.datetime | None:
         """Return the earliest known sighting of the seal."""
         return self._first_seen
 
     @property
-    def last_seen(self) -> datetime | None:
+    def last_seen(self) -> datetime.datetime | None:
         """Return the most recent known sighting of the seal."""
         return self._last_seen
 
@@ -78,7 +83,7 @@ class Seal:
         if self.estimated_birth is None:
             return None
 
-        return datetime.now(timezone.utc).year - self.estimated_birth
+        return datetime.datetime.now(datetime.timezone.utc).year - self.estimated_birth
 
     @property
     def notes(self) -> str | None:
@@ -86,7 +91,7 @@ class Seal:
         return self._notes
 
     @property
-    def created_at(self) -> datetime | None:
+    def created_at(self) -> datetime.datetime | None:
         """Return when the seal record was created."""
         return self._created_at
 
@@ -112,12 +117,12 @@ class Seal:
         self._sex = value
 
     @first_seen.setter
-    def first_seen(self, value: datetime | None) -> None:
+    def first_seen(self, value: datetime.datetime | None) -> None:
         if value is not None:
             if value.tzinfo is None:
                 raise ValueError("first_seen must be timezone-aware.")
 
-            value = value.astimezone(timezone.utc)
+            value = value.astimezone(datetime.timezone.utc)
 
         if self._first_seen is not None and value is not None:
             if self._first_seen > value:
@@ -126,12 +131,12 @@ class Seal:
         self._first_seen = value
 
     @last_seen.setter
-    def last_seen(self, value: datetime | None) -> None:
+    def last_seen(self, value: datetime.datetime | None) -> None:
         if value is not None:
             if value.tzinfo is None:
                 raise ValueError("last_seen must be timezone-aware.")
 
-            value = value.astimezone(timezone.utc)
+            value = value.astimezone(datetime.timezone.utc)
 
         if self._last_seen is not None and value is not None:
             if self._last_seen < value:
@@ -140,7 +145,7 @@ class Seal:
         self._last_seen = value
 
     @estimated_birth.setter
-    def estimated_birth(self, value: datetime | None) -> None:
+    def estimated_birth(self, value: datetime.datetime | None) -> None:
         if value is not None:
             self._estimated_birth = value.year
 
@@ -156,55 +161,131 @@ class Image:
 
     def __init__(
             self,
-            image_id: int,
-            file_path: str,
-            source: str,
-            source_id: str | None = None,
-            captured_at: datetime | None = None,
-            latitude: float | None = None,
-            longitude: float | None = None,
-            licence: str | None = None,
-            attribution: str | None = None,
+            # ID fields ......................... Reference to iNaturalist CSV
+            source: str,                                            # Internal
+            file_path: str | Path,                                  # Internal
+            image_id: int,                                          # Internal
+            source_id: str | int | None = None,                     # Column A
+            image_uuid: str | UUID | None = None,                   # Column B
+
+            # Date/time fields
+            observed_on: str | datetime.datetime | datetime.date | None = None,       # Column D
+
+            # Attribution & iNat metadata fields
+            user_id: int | None = None,                             # Column G
+            user_login: str | None = None,                          # Column H
+            user_name: str | None = None,                           # Column I
+            uploaded_at: str | datetime.datetime | None = None,              # Column J
+            updated_at: str | datetime.datetime | None = None,               # Column K
+            quality_grade: str | None = None,                       # Column L
+            licence: str | None = None,                             # Column M
+
+            # URL fields
+            url: str | None = None,                                 # Column N
+            image_url: str | None = None,                           # Column O
+
+            # Location fields
+            place_guess: str | None = None,
+            latitude: float | None = None,                          # Column X
+            longitude: float | None = None,                         # Column Y
+            positional_accuracy: int | None = None,                 # Column Z
+
+            # Species fields
+            scientific_name: str | None = None,                     # Column AK
+            common_name: str | None = None,                         # Column AL
+            taxon_id: int | None = None,                            # Column AN
+
     ) -> None:
         """Create an Image instance.
 
         Args:
-            image_id: The unique identifier for this image.
+            # ID fields
+            source: The source of the image, e.g., 'iNaturalist'.
             file_path: The path to the image file.
-            source: The source of the image, e.g., 'iNaturalist', 'Researcher upload'.
+            image_id: The internal identifier for the image.
             source_id: The identifier the original source used to identify the image.
-            captured_at: When the photograph was taken.
-            latitude: The latitude at which the photograph was taken.
-            longitude: The longitude at which the photograph was taken.
-            licence: The licence applicable to the image, e.g., 'CC BY-NC-SA 4.0'.
-            attribution: The name of the photographer or source.
+            image_uuid: The unique identifier for the image.
+
+            # Date/time fields
+            observed_on: The date the photograph was taken.
+
+            # Attribution & iNat metadata fields
+            user_id: The ID of the user who uploaded the image, if available.
+            user_login: The login name of the user who uploaded the image, if available.
+            user_name: The full name of the user who uploaded the image, if available.
+            uploaded_at: The date and time the image was uploaded to iNaturalist, if available.
+            updated_at: The date and time the image was last updated on iNaturalist, if available.
+            quality_grade: The quality grade of the image, e.g., 'research'.
+            licence: The licence applicable to the image, if available.
+
+            # URL fields
+            url: The URL of the original record on iNaturalist, if available.
+            image_url: The URL of the original image file, if available.
+
+            # Location & geoprivacy fields
+            place_guess: The best guess at the location of the photograph, if available.
+            latitude: The latitude of the location of the photograph.
+            longitude: The longitude of the location of the photograph.
+            positional_accuracy: The accuracy of the location of the photograph, if available.
+
+            # Species fields
+            scientific_name: The scientific name of the photograph.
+            common_name: The common name of the photograph.
+            taxon_id: The taxon ID of the photograph.
         """
-        self._id = image_id
-        self._file_path = file_path
+
+        # ID fields
         self._source = source
+        self._file_path = Path(file_path)
+        self._image_id = image_id
         self._source_id = source_id
-        self._captured_at = captured_at
+        self._image_uuid = image_uuid if image_uuid is not None else uuid.uuid4()
+
+        # Date/time fields
+        self._observed_on = parse_date(observed_on)
+        self._created_at = datetime.datetime.now(datetime.timezone.utc)
+
+        # Attribution & iNat metadata fields
+        self._user_id = user_id
+        self._user_login = user_login
+        self._user_name = user_name
+        self._uploaded_at = parse_datetime(uploaded_at)
+        self._updated_at = parse_datetime(updated_at)
+        self._quality_grade = quality_grade
+        self._licence = licence
+
+        # URL fields
+        self._url = url
+        self._image_url = image_url
+
+        # Location & geoprivacy fields
+        self._place_guess = place_guess
         self._latitude = latitude
         self._longitude = longitude
-        self._licence = licence
-        self._attribution = attribution
-        self._created_at = datetime.now(timezone.utc)
+        self._positional_accuracy = positional_accuracy
+
+        # Species fields
+        self._scientific_name = scientific_name
+        self._common_name = common_name
+        self._taxon_id = taxon_id
 
     ### ----------| PROPERTIES |----------
-    @property
-    def id(self) -> int:
-        """Return the unique identifier for this image."""
-        return self._id
 
-    @property
-    def file_path(self) -> str:
-        """Return the path to the image file."""
-        return self._file_path
-
+    # ID fields
     @property
     def source(self) -> str:
         """Return the source of the image."""
         return self._source
+
+    @property
+    def file_path(self) -> Path:
+        """Return the path to the image file."""
+        return self._file_path
+
+    @property
+    def image_id(self) -> int:
+        """Return the unique internal identifier for this image."""
+        return self._image_id
 
     @property
     def source_id(self) -> str | None:
@@ -212,9 +293,18 @@ class Image:
         return self._source_id
 
     @property
-    def captured_at(self) -> datetime | None:
-        """Return when the photograph was taken."""
-        return self._captured_at
+    def image_uuid(self) -> str:
+        """Return a unique identifier for the image."""
+        return str(self._image_uuid)
+
+    # Date/time fields
+    @property
+    def observed_on(self) -> datetime.date:
+        """Return the date the photograph was taken."""
+        return self._observed_on
+
+    ###############################################################
+
 
     @property
     def latitude(self) -> float | None:
@@ -237,30 +327,25 @@ class Image:
         return self._attribution
 
     @property
-    def created_at(self) -> datetime | None:
+    def created_at(self) -> datetime.datetime | None:
         """Return when the image record was created."""
         return self._created_at
 
     ### ----------| SETTERS |----------
+    @source.setter
+    def source(self, value: str) -> None:
+        self._source = value
 
     @file_path.setter
     def file_path(self, value: str) -> None:
         self._file_path = value
 
-    @source.setter
-    def source(self, value: str) -> None:
-        self._source = value
-
-    @source_id.setter
-    def source_id(self, value: str | None) -> None:
-        self._source_id = value
-
     @captured_at.setter
-    def captured_at(self, value: datetime | None) -> None:
+    def captured_at(self, value: datetime.datetime | None) -> None:
         if value is not None:
             if value.tzinfo is None:
                 raise ValueError("captured_at must be timezone-aware.")
-            value = value.astimezone(timezone.utc)
+            value = value.astimezone(datetime.timezone.utc)
 
         self._captured_at = value
 
@@ -307,7 +392,7 @@ class Sighting:
         self._seal_id = seal_id
         self._image_id = image_id
         self._confidence = confidence
-        self._created_at = datetime.now(timezone.utc)
+        self._created_at = datetime.datetime.now(datetime.timezone.utc)
 
     ### ----------| PROPERTIES |----------
 
@@ -335,7 +420,7 @@ class Sighting:
         return self._confidence
 
     @property
-    def created_at(self) -> datetime | None:
+    def created_at(self) -> datetime.datetime | None:
         """Return when the sighting record was created."""
         return self._created_at
 
@@ -355,7 +440,6 @@ class Sighting:
             if not 0 <= value <= 1:
                 raise ValueError("Confidence must be between 0 and 1.")
         self._confidence = value
-
 
 class Prediction:
     """
@@ -391,7 +475,7 @@ class Prediction:
         self._prediction = prediction
         self._confidence = confidence
         self._notes = notes
-        self._created_at = datetime.now(timezone.utc)
+        self._created_at = datetime.datetime.now(datetime.timezone.utc)
 
     ### ----------| PROPERTIES |----------
 
@@ -431,7 +515,7 @@ class Prediction:
         return self._notes
 
     @property
-    def created_at(self) -> datetime:
+    def created_at(self) -> datetime.datetime:
         """Return when the prediction record was created."""
         return self._created_at
 
@@ -462,7 +546,7 @@ class Review:
         self._image_id = image_id
         self._reviewer = reviewer
         self._notes = notes
-        self._created_at = datetime.now(timezone.utc)
+        self._created_at = datetime.datetime.now(datetime.timezone.utc)
 
     ### ----------| PROPERTIES |----------
 
@@ -497,7 +581,7 @@ class Review:
         return self._notes
 
     @property
-    def created_at(self) -> datetime:
+    def created_at(self) -> datetime.datetime:
         """Return when the review record was created."""
         return self._created_at
 
@@ -506,4 +590,3 @@ class Review:
     @notes.setter
     def notes(self, value: str | None) -> None:
         self._notes = value
-
