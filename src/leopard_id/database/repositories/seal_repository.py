@@ -1,9 +1,8 @@
-"""Data access operations for Leopard Seal records."""
-
 from datetime import datetime
 
-from leopard_id.database.database import Database
+from leopard_id.database import Database
 from leopard_id.database.models import Seal
+
 
 class SealRepository:
     """Provide database operations for Seal objects."""
@@ -19,15 +18,17 @@ class SealRepository:
                 sex,
                 first_seen,
                 last_seen,
-                notes
+                notes,
+                images
             )
-            VALUES (?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?)
             """,
             (
                 seal.sex,
                 seal.first_seen,
                 seal.last_seen,
                 seal.notes,
+                seal.images
             ),
         )
 

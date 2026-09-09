@@ -121,7 +121,8 @@ class Database:
                 first_seen TEXT,
                 last_seen TEXT,
                 notes TEXT,
-                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                images TEXT
             );
 
             CREATE TABLE IF NOT EXISTS images (
