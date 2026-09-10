@@ -187,7 +187,7 @@ class Database:
                 reviewer TEXT,
                 corrected_prediction TEXT,
                 notes TEXT,
-                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                db_created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
                 FOREIGN KEY (image_id)
                     REFERENCES images(id)
