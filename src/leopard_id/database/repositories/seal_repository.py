@@ -19,7 +19,7 @@ class SealRepository:
                 first_seen,
                 last_seen,
                 notes,
-                images
+                db_updated_at
             )
             VALUES (?, ?, ?, ?, ?)
             """,
@@ -28,7 +28,7 @@ class SealRepository:
                 seal.first_seen,
                 seal.last_seen,
                 seal.notes,
-                seal.images
+                self._datetime_to_string(datetime.now())
             ),
         )
 
@@ -45,7 +45,9 @@ class SealRepository:
                 sex,
                 first_seen,
                 last_seen,
-                notes
+                notes,
+                db_created_at,
+                db_updated_at
             FROM seals
             WHERE id = ?
             """,
@@ -68,7 +70,8 @@ class SealRepository:
                 sex = ?,
                 first_seen = ?,
                 last_seen = ?,
-                notes = ?
+                notes = ?,
+                db_updated_at = ?
             WHERE id = ?
             """,
             (
@@ -76,6 +79,7 @@ class SealRepository:
                 seal.first_seen,
                 seal.last_seen,
                 seal.notes,
+                self._datetime_to_string(datetime.now()),
                 seal.id,
             ),
         )
@@ -102,7 +106,9 @@ class SealRepository:
             sex=row["sex"],
             first_seen=row["first_seen"],
             last_seen=row["last_seen"],
-            notes=row["notes"]
+            notes=row["notes"],
+            db_created_at=row["db_created_at"],
+            db_updated_at=row["db_updated_at"]
         )
 
     @staticmethod

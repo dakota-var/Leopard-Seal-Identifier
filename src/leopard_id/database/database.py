@@ -124,7 +124,7 @@ class Database:
                 last_seen TEXT,
                 notes TEXT,
                 db_created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                db_updated_at TEXT
+                db_updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS images (
