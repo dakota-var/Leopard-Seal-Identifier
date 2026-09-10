@@ -117,44 +117,52 @@ class Database:
             """
             CREATE TABLE IF NOT EXISTS seals (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                sex TEXT,
+                sex TEXT CHECK(
+                    sex IN ('male', 'female', 'unknown') OR sex IS NULL
+                    ),
                 first_seen TEXT,
                 last_seen TEXT,
                 notes TEXT,
-                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                images TEXT
+                db_created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                db_updated_at TEXT
             );
 
             CREATE TABLE IF NOT EXISTS images (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                url TEXT NOT NULL UNIQUE,
                 file_path TEXT NOT NULL,
                 source TEXT,
                 source_id TEXT,
-                captured_at TEXT,
-                latitude REAL,
-                longitude REAL,
-                licence TEXT,
+                license TEXT,
                 attribution TEXT,
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
 
-            CREATE TABLE IF NOT EXISTS sightings (
+            CREATE TABLE IF NOT EXISTS observations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                seal_id INTEGER NOT NULL,
-                image_id INTEGER NOT NULL,
-                observed_at TEXT,
-                latitude REAL,
-                longitude REAL,
-                confidence REAL,
-                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-                FOREIGN KEY (seal_id)
-                    REFERENCES seals(id)
-                    ON DELETE CASCADE,
-
-                FOREIGN KEY (image_id)
-                    REFERENCES images(id)
-                    ON DELETE CASCADE
+                uuid TEXT NOT NULL UNIQUE,
+                observed_on TEXT,
+                user_id TEXT,
+                user_login TEXT,
+                user_name TEXT,
+                license TEXT,
+                inat_created_at TEXT,
+                inat_updated_at TEXT,
+                url TEXT,
+                image_url TEXT,
+                place_guess TEXT,
+                latitude REAL CHECK (latitude IS NULL OR latitude BETWEEN -90 AND 90),
+                longitude REAL CHECK (longitude IS NULL OR longitude BETWEEN -180 AND 180),
+                private_latitude REAL CHECK (private_latitude IS NULL OR private_latitude BETWEEN -90 AND 90),
+                private_longitude REAL CHECK (private_longitude IS NULL OR private_longitude BETWEEN -180 AND 180),
+                positional_accuracy REAL,
+                private_place_guess TEXT,
+                public_positional_accuracy REAL,
+                scientific_name TEXT,
+                common_name TEXT,
+                iconic_taxon_name TEXT,
+                taxon_id INTEGER,
+                db_created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS predictions (
@@ -163,7 +171,7 @@ class Database:
                 model_version TEXT NOT NULL,
                 prediction_type TEXT NOT NULL,
                 prediction TEXT,
-                confidence REAL,
+                confidence REAL CHECK (confidence >= 0 AND confidence <= 1),
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
                 FOREIGN KEY (image_id)
@@ -177,6 +185,7 @@ class Database:
                 prediction_id INTEGER,
                 decision TEXT NOT NULL,
                 reviewer TEXT,
+                corrected_prediction TEXT,
                 notes TEXT,
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -188,18 +197,83 @@ class Database:
                     REFERENCES predictions(id)
                     ON DELETE SET NULL
             );
+            
+            CREATE TABLE IF NOT EXISTS seal_images (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                seal_id INTEGER NOT NULL,
+                image_id INTEGER NOT NULL,
+                relationship_type TEXT,
+                notes TEXT,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-            CREATE INDEX IF NOT EXISTS idx_sightings_seal_id
-               ON sightings(seal_id);
+                UNIQUE (seal_id, image_id),
 
-            CREATE INDEX IF NOT EXISTS idx_sightings_image_id
-                ON sightings(image_id);
+                FOREIGN KEY (seal_id)
+                    REFERENCES seals(id)
+                    ON DELETE CASCADE,
+
+                FOREIGN KEY (image_id)
+                    REFERENCES images(id)
+                    ON DELETE CASCADE
+            );
+
+            CREATE TABLE IF NOT EXISTS observation_images (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                observation_id INTEGER NOT NULL,
+                image_id INTEGER NOT NULL,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                UNIQUE (observation_id, image_id),
+
+                FOREIGN KEY (observation_id)
+                    REFERENCES observations(id)
+                    ON DELETE CASCADE,
+
+                FOREIGN KEY (image_id)
+                    REFERENCES images(id)
+                    ON DELETE CASCADE
+            );
+
+            CREATE TABLE IF NOT EXISTS observation_seals (
+                observation_id INTEGER NOT NULL,
+                seal_id INTEGER NOT NULL,
+                image_id INTEGER,
+                confidence REAL,
+                notes TEXT,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                PRIMARY KEY (observation_id, seal_id, image_id),
+
+                FOREIGN KEY (observation_id)
+                    REFERENCES observations(id)
+                    ON DELETE CASCADE,
+
+                FOREIGN KEY (seal_id)
+                    REFERENCES seals(id)
+                    ON DELETE CASCADE,
+
+                FOREIGN KEY (image_id)
+                    REFERENCES images(id)
+                    ON DELETE SET NULL
+            );
 
             CREATE INDEX IF NOT EXISTS idx_predictions_image_id
                 ON predictions(image_id);
 
             CREATE INDEX IF NOT EXISTS idx_reviews_image_id
                 ON reviews(image_id);
+                
+            CREATE INDEX IF NOT EXISTS idx_reviews_prediction_id
+                ON reviews(prediction_id);
+                
+            CREATE INDEX IF NOT EXISTS idx_observation_seals_observation_id
+                ON observation_seals(observation_id);
+
+            CREATE INDEX IF NOT EXISTS idx_seal_images_image_id
+                ON seal_images(image_id);
+
+            CREATE INDEX IF NOT EXISTS idx_observation_images_image_id
+                ON observation_images(image_id);
             """
         )
 
