@@ -2,6 +2,41 @@
 
 A research-oriented software project exploring the use of machine learning to identify individual leopard seals from their unique spot patterns, record sightings, and analyse their movements and distribution.
 
+## Data Sources and Variables
+#### Basic variables
+| Label         | Description                                                                                                              | Datatype           |
+|---------------|--------------------------------------------------------------------------------------------------------------------------|--------------------|
+| `id`          | Unique, sequential identifier for the observation                                                                        | `int`              |
+| `uuid`        | Universally unique identifier for the observation                                                                        | `str \| None`      |
+| `observed_on` | Date of the observation (normalised)                                                                                     | `date \| None`     |
+| `user_id`     | Unique, sequential identifier for the observer                                                                           | `int \| None`      |
+| `user_login`  | Handle / username of the observer                                                                                        | `str \| None`      |
+| `user_name`   | Name of the observer (may be a pseudonym)                                                                                | `str \| None`      |
+| `license`     | Identifier for the license the observer has chosen. All rights reserved if empty (in which case images are not ingested) | `str \| None`      |
+| `created_at`  | Date/time observation was created                                                                                        | `datetime \| None` |
+| `updated_at`  | Date/time observation was last updated                                                                                   | `datetime \| None` |
+| `url`         | URL of the observation                                                                                                   | `str \| None`      |
+| `image_url`   | URL of the image associated with the observation                                                                         | `str \| None`      |
+#### Geo variables
+| Label                        | Description                                                                                            | Datatype        |
+|------------------------------|--------------------------------------------------------------------------------------------------------|-----------------|
+| `place_guess`                | Locality information as entered by the observer                                                        | `str \| None`   |
+| `latitude`                   | Latitude of the observation                                                                            | `float \| None` |
+| `longitude`                  | Longitude of the observation                                                                           | `float \| None` |
+| `positional_accuracy`        | Coordinate precision                                                                                   | `float \| None` |
+| `private_place_guess`        | Usually empty - Locality information as entered by the observer if obscured                            | `str \| None`   |
+| `private_latitude`           | Usually empty - Latitude of the observation if obscured                                                | `float \| None` |
+| `private_longitude`          | Usually empty - Longitude of the observation if obscured                                               | `float \| None` |
+| `public_positional_accuracy` | Max. horizontal positional uncertainty in meters (includes uncertainty added by obscuration of coords) | `float \| None` |
+
+#### Taxon variables
+| Label               | Description                                                    | Datatype        |
+|---------------------|----------------------------------------------------------------|-----------------|
+| `scientific_name`   | Scientific name of the observed taxon according to iNaturalist | `str \| None`   |
+| `common_name`       | Common name of the observed taxon according to iNaturalist     | `str \| None`   |
+| `iconic_taxon_name` | Higher-level taxonomic category for the observed taxon         | `str \| None`   |
+| `taxon_id`          | Unique, sequential identifier for the observed taxon           | `float \| None` |
+
 ## Project Status
 
 **Stage 1: Data Management & Project Foundation**
