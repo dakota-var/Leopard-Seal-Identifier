@@ -1,22 +1,47 @@
 import csv
 from datetime import date, datetime, timezone
+
+import uuid
 from uuid import uuid4
 from leopard_id.database.repositories import ObservationRepository as Repo
 from leopard_id.models import ObservationModel as Model
+
+
+from datetime import date
 
 
 def parse_date(value: str | None) -> date | None:
     if not value:
         return None
 
-    return date.fromisoformat(value)
+    value = value.strip()
+
+    # ISO format: YYYY-MM-DD
+    try:
+        return date.fromisoformat(value)
+    except ValueError:
+        pass
+
+    # iNaturalist export format: DD/MM/YYYY
+    try:
+        return datetime.strptime(value, "%d/%m/%Y").date()
+    except ValueError:
+        raise ValueError(f"Unrecognised date format: {value!r}")
 
 
 def parse_datetime(value: str | None) -> datetime | None:
     if not value:
         return None
 
-    return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    value = value.strip()
+
+    if value.endswith(" UTC"):
+        value = value[:-4] + "+00:00"
+
+    elif value.endswith("Z"):
+        value = value[:-1] + "+00:00"
+
+    return datetime.fromisoformat(value)
 
 
 def import_inat_observations(csv_path: str, repository: Repo) -> int:
@@ -29,9 +54,7 @@ def import_inat_observations(csv_path: str, repository: Repo) -> int:
 
         for row in reader:
 
-            uuid = row.get("uuid")
-
-            if uuid and repository.get_by_uuid(uuid):
+            if Repo.uuid_exists(repository, uuid.UUID(row.get("uuid"))):
                 continue
 
             observation = Model(
@@ -119,5 +142,9 @@ def import_inat_observations(csv_path: str, repository: Repo) -> int:
 
             repository.add(observation)
             imported += 1
+            print(
+                f"\rImported observation {imported} \n",
+                end="", flush=True
+            )
 
     return imported
