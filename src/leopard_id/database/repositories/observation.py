@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-
-from leopard_id.models import ObservationModel as Observation
+from uuid import UUID
+from leopard_id.models import ObservationModel as Observation, ObservationModel
 
 
 class ObservationRepository:
@@ -15,10 +15,9 @@ class ObservationRepository:
         self._session.add(observation)
         return observation
 
-    def get_by_uuid(self, uuid: str) -> Observation | None:
-        """Retrieve an observation by its iNaturalist UUID."""
-        statement = select(Observation).where(
-            Observation.database_uuid == uuid
+    def get_by_uuid(self, source_uuid: UUID) -> ObservationModel | None:
+        return self._session.scalar(
+            select(ObservationModel).where(
+                ObservationModel.source_uuid == source_uuid
+            )
         )
-
-        return self._session.scalar(statement)
