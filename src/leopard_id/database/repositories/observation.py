@@ -4,6 +4,8 @@ from uuid import UUID
 from leopard_id.models import ObservationModel as Observation, ObservationModel
 
 
+
+
 class ObservationRepository:
     """Provides database operations for observations."""
 
@@ -21,3 +23,12 @@ class ObservationRepository:
                 ObservationModel.source_uuid == source_uuid
             )
         )
+    def uuid_exists(self, source_uuid: UUID) -> bool:
+        """Check if a UUID exists in the database."""
+        return (self._session.scalars(
+            select(ObservationModel)
+            .where(ObservationModel.source_uuid == source_uuid)
+            .exists()
+            .select())
+            .one())
+

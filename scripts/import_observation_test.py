@@ -9,7 +9,7 @@ def main() -> None:
 
         try:
             imported = import_inat_observations(
-                "../data/unit_testing/test_dataset.csv",
+                "../data/unit_testing/observations-790012.csv",
                 repository,
             )
 

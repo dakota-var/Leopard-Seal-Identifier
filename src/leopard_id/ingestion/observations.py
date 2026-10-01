@@ -54,9 +54,7 @@ def import_inat_observations(csv_path: str, repository: Repo) -> int:
 
         for row in reader:
 
-            this_uuid = row.get("uuid")
-
-            if this_uuid and repository.get_by_uuid(this_uuid):
+            if Repo.uuid_exists(repository, uuid.UUID(row.get("uuid"))):
                 continue
 
             observation = Model(
@@ -144,5 +142,9 @@ def import_inat_observations(csv_path: str, repository: Repo) -> int:
 
             repository.add(observation)
             imported += 1
+            print(
+                f"\rImported observation {imported} \n",
+                end="", flush=True
+            )
 
     return imported
