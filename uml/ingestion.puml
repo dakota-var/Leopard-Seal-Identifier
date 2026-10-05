@@ -1,0 +1,55 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+:**Source Data (CSV / API)**
+e.g. iNaturalist, GBIF, other datasets;
+
+:**Ingestion Script** reads raw data and iterates over records.
+
+**Files: scripts/...**
+* Reads through the CSV or API data
+* Loops through each record
+* Orchestrates the overall process;
+
+:**Parsing & Conversion** converts source formats to Python types
+(dates, datetimes, UUIDs, numbers, etc).
+
+**Files: src/leopard_id/ingestion/...**
+* Converts strings to correct types
+* Handles source-specific formats
+* Builds a clean data structure for validation;
+
+:**Validation Layer** runs reusable checks and returns a list
+of issues (if any).
+
+**Files: src/leopard_id/validation**
+* Common checks (lat/long, dates, datetimes, etc)
+* Observation-specific checks
+* Returns a list of issues (doesn't raise immediately);
+
+if (Is the record valid?) then (yes)
+:**Duplicate Check** looks up existing record
+before inserting;<<#palegreen>>
+
+:**Repository** handles database operations; <<#palegreen>>
+
+:**Database** stores the record in PostgreSQL
+(with unique constraints); <<#lightcyan>>
+
+
+else (no)
+:**Log/Report issue** - collect and record errors
+
+**Files: src/leopard_id/logging/...**
+* Records validation issues
+* Reports skipped records
+* Helps with debugging and monitoring; <<#pink>>
+
+:**Skip Record**; <<#pink>>
+kill
+endif
+
+:**Imported**
+Record added successfully to the database;<<#lightcyan>>
+
+@enduml

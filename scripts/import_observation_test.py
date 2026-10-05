@@ -1,6 +1,6 @@
 from leopard_id.database.engine import SessionLocal
 from leopard_id.database.repositories import ObservationRepository
-from leopard_id.ingestion.observations import import_inat_observations
+from leopard_id.ingestion.observations import INatCSVImport
 
 
 def main() -> None:
@@ -8,18 +8,16 @@ def main() -> None:
         repository = ObservationRepository(session)
 
         try:
-            imported = import_inat_observations(
-                "../data/unit_testing/observations-790012.csv",
-                repository,
-            )
-
+            INatCSVImport(csv_path="../data/unit_testing/observations-778362.csv",
+                          repository=repository,
+                          )
             session.commit()
 
         except Exception:
             session.rollback()
             raise
 
-    print(f"Imported {imported} observations.")
+    print(f"\nImport complete.")
 
 
 if __name__ == "__main__":
