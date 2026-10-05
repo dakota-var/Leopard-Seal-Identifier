@@ -6,8 +6,7 @@ from uuid import uuid4
 from leopard_id.database.repositories import ObservationRepository as Repo
 from leopard_id.ingestion.validation.observations import validate_observation
 from leopard_id.ingestion.validation import CommonValidation as ComVal
-from leopard_id.models import ObservationModel as Model
-
+from leopard_id.models import ObservationModel as Model, ObservationModel
 
 from datetime import date
 
@@ -64,14 +63,15 @@ def import_inat_observations(csv_path: str, repository: Repo) -> int:
         for row in reader:
 
             if Repo.uuid_exists(repository, uuid.UUID(row.get("uuid"))):
-                continue
+                prev_update = parse_datetime(repository.get_by_uuid(uuid.UUID(row.get("uuid"))).source_updated_at)
+                if prev_update and prev_update >= parse_datetime(row.get("updated_at")):
+                    continue
+
 
             try:
                 observation = Model(
                     ### Database-specific fields
                     database_uuid=uuid4(),
-                    database_created_at=datetime.now(timezone.utc),
-                    database_updated_at=datetime.now(timezone.utc),
                     source_name="iNaturalist",
                     issues=None,
 
@@ -80,27 +80,27 @@ def import_inat_observations(csv_path: str, repository: Repo) -> int:
                     source_uuid=uuid.UUID(row.get("uuid")) if row.get("uuid") else None,
                     source_created_at=parse_datetime(row.get("created_at")),
                     source_updated_at=parse_datetime(row.get("updated_at")),
-                    observed_on_str=row.get("observed_on_string"),
+                    observed_on_str=ComVal.str(row.get("observed_on_string")),
                     observed_on=parse_date(row.get("observed_on")),
                     time_observed=parse_datetime(row.get("time_observed_at")),
-                    time_zone=row.get("time_zone"),
+                    time_zone=ComVal.str(row.get("time_zone")),
                     inat_user_id=ComVal.int(row.get("user_id")),
-                    inat_user_login=row.get("user_login"),
-                    inat_user_name=row.get("user_name"),
-                    inat_quality_grade=row.get("quality_grade"),
-                    license=row.get("license"),
-                    url=row.get("url"),
-                    image_url=row.get("image_url"),
-                    sound_url=row.get("sound_url"),
-                    tag_list=row.get("tag_list"),
-                    description=row.get("description"),
+                    inat_user_login=ComVal.str(row.get("user_login")),
+                    inat_user_name=ComVal.str(row.get("user_name")),
+                    inat_quality_grade=ComVal.str(row.get("quality_grade")),
+                    license=ComVal.str(row.get("license")),
+                    url=ComVal.str(row.get("url")),
+                    image_url=ComVal.str(row.get("image_url")),
+                    sound_url=ComVal.str(row.get("sound_url")),
+                    tag_list=ComVal.str(row.get("tag_list")),
+                    description=ComVal.str(row.get("description")),
                     num_id_agree=ComVal.int(row.get("num_identification_agreements")),
                     num_id_disagree=ComVal.int(row.get("num_identification_disagreements")),
                     captive=bool(row.get("captive_cultivated")) if row.get("captive_cultivated") else None,
                     oauth_app_id=ComVal.int(row.get("oauth_application_id")),
 
                     ### iNaturalist 'geo' fields
-                    place_guess=row.get("place_guess"),
+                    place_guess=ComVal.str(row.get("place_guess")),
                     latitude=float(row.get("latitude"))
                                 if row.get("latitude")
                                 else None,
@@ -110,8 +110,7 @@ def import_inat_observations(csv_path: str, repository: Repo) -> int:
                     positional_accuracy=float(row.get("positional_accuracy"))
                                 if row.get("positional_accuracy")
                                 else None,
-                    private_place_guess=row.get("private_place_guess"),
-                    private_latitude=float(row.get("private_latitude"))
+                    private_place_guess=ComVal.str(row.get("private_place_guess"))
                                 if row.get("private_latitude")
                                 else None,
                     private_longitude=float(row.get("private_longitude"))
@@ -120,25 +119,25 @@ def import_inat_observations(csv_path: str, repository: Repo) -> int:
                     public_pos_accuracy=float(row.get("public_positional_accuracy"))
                                 if row.get("public_positional_accuracy")
                                 else None,
-                    geoprivacy=row.get("geoprivacy"),
-                    taxon_geoprivacy=row.get("taxon_geoprivacy"),
+                    geoprivacy=ComVal.str(row.get("geoprivacy")),
+                    taxon_geoprivacy=ComVal.str(row.get("taxon_geoprivacy")),
                     coordinates_obscured=bool(row.get("coordinates_obscured"))
                                 if row.get("coordinates_obscured")
                                 else None,
-                    positioning_method=row.get("positioning_method"),
-                    positioning_device=row.get("positioning_device"),
-                    place_town_name=row.get("place_town_name"),
-                    place_county_name=row.get("place_county_name"),
-                    place_state_name=row.get("place_state_name"),
-                    place_country_name=row.get("place_country_name"),
-                    place_admin1_name=row.get("place_admin1_name"),
-                    place_admin2_name=row.get("place_admin2_name"),
+                    positioning_method=ComVal.str(row.get("positioning_method")),
+                    positioning_device=ComVal.str(row.get("positioning_device")),
+                    place_town_name=ComVal.str(row.get("place_town_name")),
+                    place_county_name=ComVal.str(row.get("place_county_name")),
+                    place_state_name=ComVal.str(row.get("place_state_name")),
+                    place_country_name=ComVal.str(row.get("place_country_name")),
+                    place_admin1_name=ComVal.str(row.get("place_admin1_name")),
+                    place_admin2_name=ComVal.str(row.get("place_admin2_name")),
 
                     ### iNaturalist 'taxon' fields
-                    species_guess=row.get("species_guess"),
-                    scientific_name=row.get("scientific_name"),
-                    common_name=row.get("common_name"),
-                    iconic_taxon_name=row.get("iconic_taxon_name"),
+                    species_guess=ComVal.str(row.get("species_guess")),
+                    scientific_name=ComVal.str(row.get("scientific_name")),
+                    common_name=ComVal.str(row.get("common_name")),
+                    iconic_taxon_name=ComVal.str(row.get("iconic_taxon_name")),
                     taxon_id=ComVal.int(row.get("taxon_id")),
                 )
 
@@ -146,7 +145,11 @@ def import_inat_observations(csv_path: str, repository: Repo) -> int:
                 if issues:
                     raise ValueError(f"Validation errors: {issues}")
 
-                repository.add(observation)
+                if Repo.uuid_exists(repository, uuid.UUID(row.get("uuid"))):
+                    repository.update(uuid.UUID(row.get("uuid")), observation)
+                else:
+                    repository.add(observation)
+
                 imported += 1
                 print(
                     f"\rImported observation {imported}",

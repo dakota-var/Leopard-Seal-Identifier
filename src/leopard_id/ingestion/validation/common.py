@@ -4,6 +4,9 @@ from datetime import date, datetime
 class CommonValidation:
     @staticmethod
     def int(value, nullable=True, negative_allowed=False) -> int | None:
+        if str(value).strip() == "":
+            value = None
+
         if value is None:
             if nullable:
                 return None
@@ -11,12 +14,24 @@ class CommonValidation:
 
         if negative_allowed:
             return int(value)
-        elif value < 0:
+        elif int(value) < 0:
             raise ValueError(
                 f"Value must be a positive integer: {value}"
             )
         else:
             return int(value)
+
+    @staticmethod
+    def str(value, nullable=True):
+        if str(value).strip() == "":
+            value = None
+
+        if value is None:
+            if nullable:
+                return None
+            raise ValueError("Value cannot be null")
+
+        return str(value)
 
 
 def validate_int(value, nullable=True, negative_allowed=False) -> int | None:

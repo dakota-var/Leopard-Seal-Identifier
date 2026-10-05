@@ -8,7 +8,7 @@ def main() -> None:
         repository = ObservationRepository(session)
 
         try:
-            INatCSVImport(csv_path="../data/unit_testing/observations-778362.csv",
+            INatCSVImport(csv_path="../data/unit_testing/observations-790012.csv",
                           repository=repository,
                           )
             session.commit()

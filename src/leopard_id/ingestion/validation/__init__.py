@@ -1,4 +1,4 @@
-from common import CommonValidation
+from .common import CommonValidation
 
 __all__ = [
     "CommonValidation"
