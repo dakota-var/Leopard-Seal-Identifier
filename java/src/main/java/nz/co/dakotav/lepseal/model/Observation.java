@@ -1,5 +1,7 @@
 package nz.co.dakotav.lepseal.model;
 
+import nz.co.dakotav.lepseal.model.observation.SourceMetadata;
+import nz.co.dakotav.lepseal.model.observation.SourceSite;
 import nz.co.dakotav.lepseal.model.util.ChangeLog;
 
 import java.time.LocalDate;
@@ -12,17 +14,12 @@ public class Observation {
     // Database ID
     private final UUID dbUuid;
     private final OffsetDateTime dbCreatedAt;
-    // Source / provenance
-    private final String sourceName;
-    private final Integer sourceId;
-    private final UUID sourceUuid;
-    private final OffsetDateTime sourceCreatedAt;
+
+    private SourceMetadata sourceMetadata;
     // Internal logging & metadata
     private final List<String> issues;
     private final ChangeLog changeLog;
-    public String getTimeZone;
     private OffsetDateTime dbUpdatedAt;
-    private OffsetDateTime sourceUpdatedAt;
     // Observation date/time
     private String observedOnString;
     private LocalDate observedOn;
@@ -32,12 +29,7 @@ public class Observation {
     private Integer sourceUserId;
     private String sourceUserLogin;
     private String sourceUserName;
-    private String qualityGrade;
-    private String license;
-    private String url;
-    private String imageUrl;
-    private String soundUrl;
-    private List<String> tags;
+    private String tags;
     private String description;
     private Boolean captive;
     // Geographic & location metadata
@@ -60,35 +52,17 @@ public class Observation {
     private String commonName;
     private Integer taxonId;
 
-    private Observation(
-            String sourceName, Integer sourceId, UUID sourceUuid, OffsetDateTime sourceCreatedAt) {
+    private Observation() {
         this.dbUuid = UUID.randomUUID();
         this.dbCreatedAt = OffsetDateTime.now();
         this.dbUpdatedAt = OffsetDateTime.now();
         this.issues = new ArrayList<>();
         this.changeLog = new ChangeLog();
-
-        this.sourceName = sourceName;
-        this.sourceId = sourceId;
-        this.sourceUuid = sourceUuid;
-        this.sourceCreatedAt = sourceCreatedAt;
     }
 
-    private static IllegalArgumentException iae(String message) {
-        return new IllegalArgumentException(message);
-    }
-
-    private static NullPointerException npe(String message) {
-        return new NullPointerException(message);
-    }
-
-    private static UnsupportedOperationException uoe(String message) {
-        return new UnsupportedOperationException(message);
-    }
-
-    // =================================================================================================================
+    // ============================================================================================
     // Getters
-    // =================================================================================================================
+    // ============================================================================================
     // Database ID
     public UUID getDbUuid() {
         return dbUuid;
@@ -109,27 +83,6 @@ public class Observation {
 
     public ChangeLog getChangeLog() {
         return changeLog;
-    }
-
-    // Source / provenance
-    public String getSourceName() {
-        return sourceName;
-    }
-
-    public Integer getSourceId() {
-        return sourceId;
-    }
-
-    public UUID getSourceUuid() {
-        return sourceUuid;
-    }
-
-    public OffsetDateTime getSourceCreatedAt() {
-        return sourceCreatedAt;
-    }
-
-    public OffsetDateTime getSourceUpdatedAt() {
-        return sourceUpdatedAt;
     }
 
     // Observation date/time
@@ -162,27 +115,7 @@ public class Observation {
         return sourceUserName;
     }
 
-    public String getQualityGrade() {
-        return qualityGrade;
-    }
-
-    public String getLicense() {
-        return license;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public String getSoundUrl() {
-        return soundUrl;
-    }
-
-    public List<String> getTags() {
+    public String getTags() {
         return tags;
     }
 
@@ -268,21 +201,21 @@ public class Observation {
         private final Observation observation;
 
         public Builder(Observation observation) {
-
             this.observation = observation;
             observation.dbUpdatedAt = OffsetDateTime.now();
             observation.changeLog.add("Observation updated.");
         }
 
-        public Builder(String sourceName, Integer sourceId, UUID sourceUuid, OffsetDateTime sourceCreatedAt) {
-            observation = new Observation(sourceName, sourceId, sourceUuid, sourceCreatedAt);
+        public Builder(SourceMetadata sourceMetadata) {
+            observation = new Observation();
+            observation.sourceMetadata = sourceMetadata;
             observation.dbUpdatedAt = OffsetDateTime.now();
-            observation.changeLog.add("Observation created with source " + sourceName + ", ID " + sourceId + ", UUID " + sourceUuid + ", originally created at " + sourceCreatedAt + ".");
+            observation.changeLog.add("Observation created.");
         }
 
         // Source / provenance
-        public Builder sourceUpdatedAt(OffsetDateTime sourceUpdatedAt) {
-            observation.sourceUpdatedAt = sourceUpdatedAt;
+        public Builder sourceMetadata(SourceMetadata sourceMetadata) {
+            observation.sourceMetadata = sourceMetadata;
             return this;
         }
 
@@ -323,32 +256,7 @@ public class Observation {
             return this;
         }
 
-        public Builder qualityGrade(String qualityGrade) {
-            observation.qualityGrade = qualityGrade;
-            return this;
-        }
-
-        public Builder license(String license) {
-            observation.license = license;
-            return this;
-        }
-
-        public Builder url(String url) {
-            observation.url = url;
-            return this;
-        }
-
-        public Builder imageUrl(String imageUrl) {
-            observation.imageUrl = imageUrl;
-            return this;
-        }
-
-        public Builder soundUrl(String soundUrl) {
-            observation.soundUrl = soundUrl;
-            return this;
-        }
-
-        public Builder tags(List<String> tags) {
+        public Builder tags(String tags) {
             observation.tags = tags;
             return this;
         }
