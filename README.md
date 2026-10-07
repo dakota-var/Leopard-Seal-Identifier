@@ -125,7 +125,7 @@ data/
 ├── processed/
 │   └── [processed datasets]
 │
-└── test/
+└── src.test/
     └── [small dataset for development/testing]
 ```
 

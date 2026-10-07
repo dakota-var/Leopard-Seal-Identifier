@@ -150,7 +150,7 @@ data/
 ├── interim/
 ├── processed/
 ├── training/
-└── test/
+└── src.test/
 ```
 
 ### `raw/`
@@ -171,7 +171,7 @@ Cleaned or transformed data ready for use by the application or machine-learning
 
 Data prepared specifically for model training.
 
-### `test/`
+### `src.test/`
 
 A small, controlled dataset used for development and testing.
 
@@ -213,7 +213,7 @@ Potential validation checks include:
 
 ## Machine-Learning Data Leakage
 
-Care must be taken when creating training, validation, and test datasets.
+Care must be taken when creating training, validation, and src.test datasets.
 
 Multiple photographs of the same individual, particularly photographs from the same encounter, should not automatically be treated as independent observations.
 

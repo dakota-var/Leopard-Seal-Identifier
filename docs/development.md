@@ -40,7 +40,7 @@ leopard-seal-id/
 │   ├── interim/
 │   ├── processed/
 │   ├── training/
-│   └── test/
+│   └── src.test/
 ├── models/
 ├── notebooks/
 ├── README.md
@@ -102,7 +102,7 @@ Jupyter notebooks should generally be used for exploration and experimentation r
 
 Tests should be added alongside new functionality where practical.
 
-The test suite should eventually cover:
+The src.test suite should eventually cover:
 
 * Database operations
 * Data validation
@@ -114,7 +114,7 @@ The test suite should eventually cover:
 
 Tests should not depend on the complete external dataset.
 
-A small controlled test dataset should be used where image data is required.
+A small controlled src.test dataset should be used where image data is required.
 
 ## Database Development
 
